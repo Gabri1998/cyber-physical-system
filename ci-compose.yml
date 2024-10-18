@@ -1,0 +1,33 @@
+version: "3.3" # Must be present exactly once at the beginning of the docker-compose.yml file
+services: # Must be present exactly once at the beginning of the docker-compose.yml file
+  video-h264-replay:
+    build:
+      context: https://github.com/chalmers-revere/opendlv-video-h264-replay.git#v0.0.4
+      dockerfile: Dockerfile
+    restart: on-failure
+    network_mode: "host"
+    ipc: "host"
+    volumes:
+      - /tmp:/tmp
+      - ${PWD}/../recordings:/recordings
+    command: ["/usr/bin/opendlv-video-h264-replay", "--cid=253", "--name=img", "/recordings/${RECORDING_FILE}"]
+
+  termuric-cod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /builds/gabri/cyber/artifacts/csv:/host
+      - /tmp:/tmp
+    network_mode: "host"
+    ipc: "host"
+    command: ["/usr/bin/template-opencv", "--width=640", "--height=480", "--name=img", "--cid=253", "--cv-data"]
+
+  termuric-cod-prev:
+    image: previous:latest
+    volumes:
+      - ${PWD}/../artifacts/csv/previous_commit:/host
+      - /tmp:/tmp
+    network_mode: "host"
+    ipc: "host"
+    command: ["/usr/bin/template-opencv", "--width=640", "--height=480", "--name=img", "--cid=253", "--cv-data"]
